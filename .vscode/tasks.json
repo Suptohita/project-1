@@ -1,0 +1,53 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Upload main.py",
+            "type": "shell",
+            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 fs cp -f main.py :main.py",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Upload libs",
+            "type": "shell",
+            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 fs put libs /",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Reset ESP32",
+            "type": "shell",
+            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 reset",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Upload & Reset",
+            "type": "shell",
+            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 fs cp -f main.py :main.py && venv/bin/mpremote connect /dev/tty.usbserial-210 fs put libs / && venv/bin/mpremote connect /dev/tty.usbserial-210 reset",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Open REPL",
+            "type": "shell",
+            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "shared"
+            }
+        }
+    ]
+}
