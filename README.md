@@ -48,6 +48,15 @@ A MicroPython project for ESP32 that implements an interactive color mixing game
      - "Upload & Reset": Uploads everything and resets the ESP32
      - "Reset ESP32": Resets the device
      - "Open REPL": Opens the MicroPython REPL for debugging
+2. **You may need to upload files inside the libs folder:**
+   ```
+   mpremote connect /dev/tty.usbserial-xxx fs mkdir :libs
+   mpremote connect /dev/tty.usbserial-xxx fs cp libs/filename.py :libs/filename.py
+
+   example:
+   mpremote connect /dev/tty.usbserial-210 fs mkdir :libs
+   mpremote connect /dev/tty.usbserial-210 fs cp libs/tcs34725.py :libs/tcs34725.py
+   ```
 
 
 ## 📁 Project Structure
@@ -73,4 +82,3 @@ colorMixingGame/
 - Don't forget to create and activate venv
 - Ensure the ESP32 is connected to the correct serial port (/dev/tty.usbserial-210)
 - For troubleshooting, check the MicroPython documentation and ESP32 pinouts.
-
