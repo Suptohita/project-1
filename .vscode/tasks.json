@@ -4,7 +4,7 @@
         {
             "label": "Upload main.py",
             "type": "shell",
-            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 fs cp -f main.py :main.py",
+            "command": "pkill -f 'mpremote connect /dev/tty.usbserial-210' || true && venv/bin/mpremote connect /dev/tty.usbserial-210 fs cp -f main.py :main.py",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -13,7 +13,7 @@
         {
             "label": "Upload libs",
             "type": "shell",
-            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 fs put libs /",
+            "command": "pkill -f 'mpremote connect /dev/tty.usbserial-210' || true && venv/bin/mpremote connect /dev/tty.usbserial-210 fs put libs /",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -22,7 +22,7 @@
         {
             "label": "Reset ESP32",
             "type": "shell",
-            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 reset",
+            "command": "pkill -f 'mpremote connect /dev/tty.usbserial-210' || true && venv/bin/mpremote connect /dev/tty.usbserial-210 reset",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -31,7 +31,7 @@
         {
             "label": "Upload & Reset",
             "type": "shell",
-            "command": "venv/bin/mpremote connect /dev/tty.usbserial-210 fs cp -f main.py :main.py && venv/bin/mpremote connect /dev/tty.usbserial-210 fs put libs / && venv/bin/mpremote connect /dev/tty.usbserial-210 reset",
+            "command": "pkill -f 'mpremote connect /dev/tty.usbserial-210' || true && venv/bin/mpremote connect /dev/tty.usbserial-210 fs cp -f main.py :main.py && venv/bin/mpremote connect /dev/tty.usbserial-210 fs put libs / && venv/bin/mpremote connect /dev/tty.usbserial-210 reset",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
