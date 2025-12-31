@@ -5,6 +5,7 @@ MAX_8BIT = 255
 MAX_16BIT = 65_535
 PWM_FREQ = 1_000
 
+
 class RGBLED:
     """
     Control a single RGB LED using PWM.
@@ -58,4 +59,5 @@ class RGBLED:
         g = random.randint(0, MAX_8BIT)
         b = random.randint(0, MAX_8BIT)
         self.set_color(r, g, b)
-        print("RGB:", r, g, b)
+        print("Generated RGB:", r, g, b)
+        return r, g, b
