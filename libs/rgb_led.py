@@ -60,5 +60,4 @@ class RGBLED:
         b = random.randint(0, MAX_8BIT)
         if set_color:
             self.set_color(r, g, b)
-        print("Generated RGB:", r, g, b)
         return r, g, b

@@ -1,78 +1,46 @@
 from machine import I2C, Pin
+# from libs import tcs34725
+from libs import rgb_led, button, pot_dimmer
 import time
-from libs import tcs34725, rgb_led
+
+def sleep(s):
+    time.sleep(s)
 
 i2c = I2C(0, scl=Pin(22), sda=Pin(21))
-sensor = tcs34725.TCS34725(i2c)
-rgb = rgb_led.RGBLED(18, 4, 23, invert=True)
-
+# sensor's led
 Pin(17, Pin.OUT).value(0)
 
+# sensor = tcs34725.TCS34725(i2c)
+rgb = rgb_led.RGBLED(17, 5, 16)
+lock_btn = button.Button(23)
+target_color = rgb.generate_random_color(True)
 
-def measure_color():
-    sensor.active(True)
-    time.sleep(1)
+print('Generating Color...')
+sleep(10)
+print(f'Your Target color: {target_color}')
 
-    total_r = 0
-    total_g = 0
-    total_b = 0
-    total_lux = 0
+dimmers = {}
 
-    warmup_count = 5
-    total_iterations = 50
-    measured_count = 0
+dimmer_config = [
+    {"name": "Green", "pot": 33, "led": 5},
+    {"name": "Blue",  "pot": 35, "led": 16},
+    {"name": "Red",   "pot": 32, "led": 17},
+]
 
-    for i in range(total_iterations):
-        r, g, b, c = sensor.read_raw()
-        html_r, html_g, html_b = tcs34725.html_rgb((r, g, b, c))
-
-        # Clamp RGB to 0-255
-        html_r = min(max(html_r, 0), 255)
-        html_g = min(max(html_g, 0), 255)
-        html_b = min(max(html_b, 0), 255)
-
-        _, lux = sensor.read()
-
-        print(f"Measured RGB: ({html_r}, {html_g}, {html_b}), Lux: {lux}")
-
-        if i >= warmup_count:
-            if i == warmup_count:
-                print("Now Measuring")
-            total_r += html_r
-            total_g += html_g
-            total_b += html_b
-            if lux is not None and lux >= 0:
-                total_lux += lux
-            measured_count += 1
-
-        time.sleep(0.2)
-
-    sensor.active(False)
-
-    avg_r = total_r // measured_count
-    avg_g = total_g // measured_count
-    avg_b = total_b // measured_count
-    avg_lux = total_lux // measured_count if total_lux > 0 else 0
-
-    return (avg_r, avg_g, avg_b), avg_lux
+for item in dimmer_config:
+    dimmer = pot_dimmer.PotDimmer(item["pot"], item["led"])
+    dimmers[item["name"]] = dimmer
 
 
 while True:
-    user_input = input("Generate a random color: (y/n) ")
+    status_msg = ""
 
-    if user_input.lower() == "y":
-        random_color = rgb.set_random_color()
-        time.sleep(1)
+    if lock_btn.was_pressed():
+        pass
 
-        measured_color, measured_lux = measure_color()
-        print(
-            f"Color of the LED is: {measured_color}, "
-            f"Actual color is: {random_color}, "
-            f"Lux: {measured_lux}"
-        )
+    for name, dimmer_obj in dimmers.items():
+        val = dimmer_obj.update()
+        status_msg += f"{name}:{val}  "
 
-    elif user_input.lower() == "n":
-        break
-
-    else:
-        print("Invalid input. Please enter 'y' or 'n'.")
+    print(status_msg, end='\r')
+    time.sleep(0.05)
