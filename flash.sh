@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source venv/bin/activate
+echo "Venv activated"
+
 # Flash ESP32 firmware
 echo "Erasing flash..."
 esptool --chip esp32 --port /dev/tty.usbserial-210 erase_flash

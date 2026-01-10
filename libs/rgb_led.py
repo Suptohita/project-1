@@ -53,11 +53,12 @@ class RGBLED:
         self.pwm_g.duty_u16(dg)
         self.pwm_b.duty_u16(db)
 
-    def set_random_color(self):
+    def generate_random_color(self, set_color=False):
         """Generate a random color and set it."""
         r = random.randint(0, MAX_8BIT)
         g = random.randint(0, MAX_8BIT)
         b = random.randint(0, MAX_8BIT)
-        self.set_color(r, g, b)
+        if set_color:
+            self.set_color(r, g, b)
         print("Generated RGB:", r, g, b)
         return r, g, b
