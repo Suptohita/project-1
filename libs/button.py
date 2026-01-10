@@ -2,18 +2,30 @@ from machine import Pin
 import time
 
 class Button:
-    def __init__(self, pin, pull=Pin.PULL_UP, debounce_ms=50):
-        self.pin = Pin(pin, Pin.IN, pull)
+    def __init__(self, pin_number, debounce_ms=200):
+        self.pin = Pin(pin_number, Pin.IN, Pin.PULL_UP)
         self.debounce_ms = debounce_ms
-        self._last_state = self.pin.value()
-        self._last_time = time.ticks_ms()
+        self.last_press_time = 0
+        self.last_state = 1 
 
-    def is_pressed(self):
-        current = self.pin.value()
-        now = time.ticks_ms()
-        if current != self._last_state:
-            self._last_time = now
-            self._last_state = current
-        if (time.ticks_diff(now, self._last_time) > self.debounce_ms) and (current == 0):
-            return True
-        return False
+    def was_pressed(self):
+        """
+        Checks if the button was just pressed.
+        Returns True ONLY on the moment of the press (Falling Edge).
+        """
+        current_state = self.pin.value()
+        is_pressed_now = False
+        
+        if current_state == 0 and self.last_state == 1:
+            
+            current_time = time.ticks_ms()
+            if time.ticks_diff(current_time, self.last_press_time) > self.debounce_ms:
+                self.last_press_time = current_time
+                is_pressed_now = True
+        
+        self.last_state = current_state
+        return is_pressed_now
+
+    def is_held(self):
+        """Returns True as long as the button is being held down."""
+        return self.pin.value() == 0
