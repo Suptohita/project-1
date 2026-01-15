@@ -19,5 +19,6 @@ mpremote connect /dev/tty.usbserial-210 fs cp libs/tcs34725.py :libs/tcs34725.py
 mpremote connect /dev/tty.usbserial-210 fs cp libs/rgb_led.py :libs/rgb_led.py
 mpremote connect /dev/tty.usbserial-210 fs cp libs/button.py :libs/button.py
 mpremote connect /dev/tty.usbserial-210 fs cp libs/pot_dimmer.py :libs/pot_dimmer.py
+mpremote connect /dev/tty.usbserial-210 fs cp libs/ili9341.py :libs/ili9341.py
 
 echo "Done!"
