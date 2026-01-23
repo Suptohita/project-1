@@ -50,6 +50,7 @@ def normalize_pot_value(val):
 def calculate_score(target, current):
     tr, tg, tb = target
     cr, cg, cb = current
+    # Max Euclidean distance (White to Black) is approx 441.67
     error = sqrt((tr - cr)**2 + (tg - cg)**2 + (tb - cb)**2)
     max_error = 441.67
     return int(max(0, 100 - (error / max_error * 100)))
@@ -85,7 +86,7 @@ current_rgb = (0,0,0)
 last_rgb = (-1,-1,-1)
 
 is_hinting = False 
-hint_count = 0 # Keeps track of how many times hint was pressed
+hint_count = 0 
 
 print("System Ready.")
 
@@ -116,12 +117,11 @@ while True:
         # 2. Check Hint Button (Active Low)
         button_pressed = (hint_pin.value() == 0)
         
-        # TRANSITION: Released -> Pressed (Start of a hint usage)
+        # TRANSITION: Released -> Pressed
         if button_pressed and not is_hinting:
             is_hinting = True
-            hint_count += 1 # Increment usage count
+            hint_count += 1
             print(f"Hint used! Count: {hint_count}")
-            
             draw_layout_hint(target_rgb)
             last_rgb = (-1,-1,-1)
 
@@ -145,23 +145,23 @@ while True:
             GAME_STATE = "RESULT"
 
     elif GAME_STATE == "RESULT":
-        # Calculate Raw Score
-        raw_score = calculate_score(target_rgb, current_rgb)
+        # --- CALCULATE SCORES ---
         
-        # Apply Cumulative Penalty (5% per hint)
+        # 1. Raw Accuracy (0-100%)
+        raw_accuracy = calculate_score(target_rgb, current_rgb)
+        
+        # 2. Penalty Calculation
         penalty_percentage = hint_count * 5
+        if penalty_percentage > 100: penalty_percentage = 100
         
-        # Ensure we don't reduce below 0
-        if penalty_percentage > 100:
-            penalty_percentage = 100
-            
+        # 3. Final Total Score (Integer)
         penalty_factor = (100 - penalty_percentage) / 100.0
-        final_score = int(raw_score * penalty_factor)
+        final_score = int(raw_accuracy * penalty_factor)
         
-        # --- DRAW RESULT SCREEN ---
+        # --- DRAW VISUALS ---
         display.clear(BLACK)
         
-        # Visual Comparison
+        # Target vs Mix
         t_color = ili9341.color565(*target_rgb)
         p_color = ili9341.color565(*current_rgb)
         
@@ -171,23 +171,34 @@ while True:
         display.draw_text8x8(170, 10, "YOUR MIX", WHITE)
         display.fill_rectangle(170, 25, 140, 100, p_color)
         
-        # Score Display
-        if final_score > 90:
-            msg, c = "PERFECT!", GREEN
-        elif final_score > 70:
-            msg, c = "NICE MATCH", BLUE
-        else:
-            msg, c = "TRY AGAIN", RED
-            
-        display.draw_text8x8(10, 150, f"SCORE: {final_score}%", WHITE)
+        # --- DRAW DATA BREAKDOWN ---
         
-        # Show specific penalty details
+        # Line 1: Match Accuracy
+        display.draw_text8x8(10, 160, f"Match Accuracy: {raw_accuracy}%", WHITE)
+        
+        # Line 2: Hints & Penalty
         if hint_count > 0:
-             penalty_msg = f"Hints: {hint_count} (-{penalty_percentage}%)"
-             display.draw_text8x8(120, 150, penalty_msg, YELLOW)
+            penalty_msg = f"Hints: {hint_count} (Penalty: -{penalty_percentage}%)"
+            display.draw_text8x8(10, 175, penalty_msg, YELLOW)
+        else:
+            display.draw_text8x8(10, 175, "Hints: 0 (Bonus: Clean Run)", GREEN)
 
-        display.draw_text8x8(10, 170, msg, c)
-        display.draw_text8x8(10, 210, "Next: Press Hint | Rst: BTN 12", WHITE)
+        # Line 3: Final Score (Large & Colored)
+        if final_score > 90:
+            c = GREEN
+            rank = "Excellent!"
+        elif final_score > 70:
+            c = BLUE
+            rank = "Good Job"
+        else:
+            c = RED
+            rank = "Try Again"
+
+        # Note: No '%' symbol here, just the points
+        display.draw_text8x8(10, 195, f"TOTAL SCORE: {final_score}", c)
+        display.draw_text8x8(180, 195, rank, c)
+        
+        display.draw_text8x8(10, 220, "Next: Press Hint | Rst: BTN 12", WHITE)
         
         # Wait for input
         while True:
