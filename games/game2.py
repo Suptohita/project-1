@@ -50,35 +50,56 @@ def start_game(player_num=1):
 
     def print_target_info(round_num, total):
         print("\n" + "=" * 50)
-        print(f"COLOR SCAVENGER HUNT - P{player_num} ROUND {round_num}/{total}".center(50))
+        print(f"ROUND {round_num}/{total}".center(50))
         print("=" * 50)
-        print("Memorize the color shown on the LED")
-        print("Adjust knobs to match, then press MIDDLE button to Lock In")
-        print("Press LEFT button to Restart")
+        print("Watch the LED carefully!")
+        print("The color will appear for 5 seconds, then disappear.")
+        print("You must recreate it from memory.")
         print("=" * 50)
 
     def show_target_color(target, duration_ms=5000):
         rgb.set_color(*target)
         seconds = max(1, int(duration_ms / 1000))
         for remaining in range(seconds, 0, -1):
-            print(f"Check the LED, turning off color in {remaining}")
+            print(f"Color visible for {remaining} more second{'s' if remaining > 1 else ''}...")
             sleep_ms(1000)
         rgb.set_color(0, 0, 0)
-        print("Time's up! Now guess the color.")
+        print("\nLED is now OFF! Recreate the color from memory.")
 
-    def print_round_result(current_score):
-        print(f"\nRound result: {current_score} points")
-        print(f"Total score so far: {score}/{len(target_colors)}")
+    def print_round_result(current_score, round_num, total):
+        print("\n" + "=" * 50)
+        if current_score == 1:
+            print(f"Round {round_num} PASSED! (Accuracy ≥80%)")
+        else:
+            print(f"Round {round_num} FAILED (Accuracy <80%)")
+        print(f"Your progress: {score}/{total} rounds passed")
         print("=" * 50)
 
     def print_final_result():
         print("\n" + "=" * 50)
-        print(f"GAME COMPLETE - P{player_num}".center(50))
-        print(f"Your final score: {score}/{len(target_colors)}".center(50))
+        print(f"GAME 2 COMPLETE - PLAYER {player_num}".center(50))
         print("=" * 50)
-        print("\nPress RIGHT button to Continue or LEFT button to Restart")
+        print(f"Final score: {score}/{len(target_colors)} rounds passed")
+        percentage = int((score / len(target_colors)) * 100)
+        print(f"Success rate: {percentage}%")
+        print("=" * 50)
+        print("\n[Press RIGHT button to continue]")
 
-    print(f"\nStarting Color Scavenger Hunt for Player {player_num}...")
+    print("\n\n")
+    print("=" * 50)
+    print("GAME 2: COLOR SCAVENGER HUNT".center(50))
+    print(f"PLAYER {player_num}".center(50))
+    print("=" * 50)
+    print("Watch the LED - you'll see a color for 5 seconds!")
+    print("Then recreate it from memory using the RGB knobs.")
+    print("You'll play 5 rounds. No hints available!")
+    print("-" * 50)
+    print("Controls:")
+    print("  • Turn RGB knobs to recreate the color")
+    print("  • MIDDLE button = Lock in your answer")
+    print("=" * 50)
+    print("\nReady to start...")
+    sleep_ms(1500)
 
     GAME_STATE = "START"
 
@@ -88,8 +109,8 @@ def start_game(player_num=1):
         if GAME_STATE == "START":
             current_round = 0
             score = 0
-            print("Get ready for the first target...")
-            sleep_ms(500)
+            print("\n🎯 Get ready for the first color...")
+            sleep_ms(1000)
             GAME_STATE = "ROUND"
 
         elif GAME_STATE == "ROUND":
@@ -115,10 +136,13 @@ def start_game(player_num=1):
                     round_score = calculate_score(target, current_rgb)
                     if round_score >= 80:
                         score += 1
-                        print_round_result(1)
+                        print_round_result(1, current_round + 1, len(target_colors))
                     else:
-                        print_round_result(0)
+                        print_round_result(0, current_round + 1, len(target_colors))
                     current_round += 1
+                    if current_round < len(target_colors):
+                        print(f"\n🎯 Get ready for Round {current_round + 1}...")
+                        sleep_ms(1000)
                     round_done = True
 
                 sleep_ms(50)
@@ -128,7 +152,7 @@ def start_game(player_num=1):
             while True:
                 check_global_restart()
                 if hint_btn.was_pressed():
-                    print("\nContinuing...")
+                    print("\nMoving on...")
                     sleep_ms(500)
                     return score
                 sleep_ms(50)

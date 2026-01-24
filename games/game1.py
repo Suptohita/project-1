@@ -62,69 +62,88 @@ def start_game(player_num=1):
         print("=" * 50)
 
     def print_target_dashboard(rgb_val, player_num, round_num, total_rounds):
-        print_header(f"TARGET COLOR GENERATED (P{player_num} R{round_num}/{total_rounds})")
-        print("CHANNEL | CURRENT LEVEL       | VALUE")
+        print_header(f"ROUND {round_num}/{total_rounds} - TARGET COLOR")
+        print("Match this color using the RGB knobs:")
         print_separator()
-        print(f" R      | {get_bar(rgb_val[0], 20)} | {rgb_val[0]:03}")
-        print(f" G      | {get_bar(rgb_val[1], 20)} | {rgb_val[1]:03}")
-        print(f" B      | {get_bar(rgb_val[2], 20)} | {rgb_val[2]:03}")
+        print("CHANNEL | LEVEL                | VALUE")
         print_separator()
-        print("Actions:")
-        print("  - Turn knobs to match the target color")
-        print("  - Press RIGHT button for Hint")
-        print("  - Press MIDDLE button to Lock In")
-        print("  - Press LEFT button to Restart")
+        print(f" Red    | {get_bar(rgb_val[0], 20)} | {rgb_val[0]:03}")
+        print(f" Green  | {get_bar(rgb_val[1], 20)} | {rgb_val[1]:03}")
+        print(f" Blue   | {get_bar(rgb_val[2], 20)} | {rgb_val[2]:03}")
+        print_separator()
 
     def print_hint_dashboard(hint_num, target, current):
-        print_header(f"HINT #{hint_num} USED")
-        print("CH | TARGET        | YOUR MIX")
+        print_header(f"HINT #{hint_num} - COMPARISON")
+        print("Compare your mix with the target:")
         print_separator()
-        print(f" R | {get_bar(target[0], 15)} {target[0]:03} | {get_bar(current[0], 15)} {current[0]:03}")
-        print(f" G | {get_bar(target[1], 15)} {target[1]:03} | {get_bar(current[1], 15)} {current[1]:03}")
-        print(f" B | {get_bar(target[2], 15)} {target[2]:03} | {get_bar(current[2], 15)} {current[2]:03}")
+        print("CHANNEL | TARGET              | YOUR MIX")
         print_separator()
+        print(f" Red    | {get_bar(target[0], 15)} {target[0]:03} | {get_bar(current[0], 15)} {current[0]:03}")
+        print(f" Green  | {get_bar(target[1], 15)} {target[1]:03} | {get_bar(current[1], 15)} {current[1]:03}")
+        print(f" Blue   | {get_bar(target[2], 15)} {target[2]:03} | {get_bar(current[2], 15)} {current[2]:03}")
+        print_separator()
+        print(f"Penalty: -{hint_num * 5}% (each hint costs 5%)")
 
     def print_result_card(target, current, raw_score, penalty_pct, final_score, hint_count, player_num, round_num, total_rounds):
         score_history.append({"player": player_num, "round": round_num, "score": final_score, "hints": hint_count})
 
-        print_header(f"FINAL RESULTS (P{player_num} R{round_num}/{total_rounds})")
-        print("CH | TARGET | YOURS")
+        print_header(f"ROUND {round_num}/{total_rounds} RESULTS")
+        print("Your match vs Target:")
         print_separator()
-        for ch, t, c in zip(["R", "G", "B"], target, current):
+        print("CHANNEL | TARGET | YOUR MIX")
+        print_separator()
+        for ch, t, c in zip(["Red  ", "Green", "Blue "], target, current):
             print(f" {ch} |  {t:03}   |  {c:03}")
         print_separator()
         print(f"Accuracy: {raw_score}%")
-        print(f"Penalty:  -{penalty_pct}% ({hint_count} hint(s))" if hint_count else "Penalty: 0% (Perfect Run!)")
+        if hint_count:
+            print(f"Hint penalty: -{penalty_pct}% ({hint_count} hint{'s' if hint_count > 1 else ''})")
+        else:
+            print("Hint penalty: 0% (Perfect - no hints used!)")
         print_separator()
-        print(f"TOTAL SCORE:  >> {final_score} <<".center(50))
+        print(f"ROUND SCORE: {final_score} points".center(50))
         print("=" * 50)
 
-        if score_history:
-            print_header("SCORE HISTORY")
-            for i, entry in enumerate(score_history, 1):
-                print(f" P{entry['player']} R{entry['round']}: {entry['score']} points ({entry['hints']} hint(s))")
+        if len(score_history) > 1:
+            print_header("YOUR PROGRESS")
+            for entry in score_history:
+                print(f"  Round {entry['round']}: {entry['score']} points ({entry['hints']} hint{'s' if entry['hints'] > 1 else ''})")
             print("=" * 50)
 
-        print("\n[Press RIGHT button to Continue or LEFT button to Restart]")
+        if round_num < total_rounds:
+            print("\n[Press RIGHT button for next round]")
+        else:
+            print("\n[Press RIGHT button to continue]")
 
     def print_game_total(player_num, total_score, total_rounds):
-        print_header(f"GAME 1 COMPLETE (P{player_num})")
-        print(f"Rounds played: {total_rounds}")
-        print(f"Total score: {total_score}")
+        print_header(f"GAME 1 COMPLETE - PLAYER {player_num}")
+        print(f"Rounds completed: {total_rounds}/2")
+        print(f"Total score: {total_score} points")
         print("=" * 50)
-        print("\n[Press RIGHT button to Continue to Game 2 or LEFT button to Restart]")
+        print("\nGreat job! Moving to Game 2...")
+        print("[Press RIGHT button to continue]")
 
     print("\n\n")
     print("=" * 50)
-    print("SPECTRAL LIGHT MIXER (CONSOLE)".center(50))
+    print("GAME 1: SPECTRAL LIGHT MIXER".center(50))
+    print(f"PLAYER {player_num}".center(50))
     print("=" * 50)
-    print("System Ready. Waiting for start...")
+    print("Match the target color using the RGB knobs!")
+    print("You'll play 2 rounds.")
+    print_separator()
+    print("Controls:")
+    print("  • Turn RGB knobs to match the target")
+    print("  • RIGHT button = Hint (costs 5% per hint)")
+    print("  • MIDDLE button = Lock in your answer")
+    print("=" * 50)
+    print("\nReady to start...")
+    sleep_ms(1500)
 
     while True:
         check_global_restart()
 
         if GAME_STATE == "START":
-            print("\n...Generating target color...")
+            print(f"\n🎨 Generating target color for Round {round_index + 1}...")
             sleep_ms(1000)
             target_rgb = rgb.generate_random_color(True)
             hint_count = 0
@@ -170,8 +189,8 @@ def start_game(player_num=1):
                     if round_index >= rounds_total:
                         GAME_STATE = "GAME_COMPLETE"
                     else:
-                        print("\n\nStarting next round...")
-                        sleep_ms(500)
+                        print("\n\n✨ Starting Round {}...".format(round_index + 1))
+                        sleep_ms(1000)
                         GAME_STATE = "START"
                     break
                 sleep_ms(50)
