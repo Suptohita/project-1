@@ -1,4 +1,4 @@
-from games import game1, game2
+from games import game1, game2, game3
 from libs import button
 from time import sleep_ms
 
@@ -9,9 +9,10 @@ while True:
     print("=" * 50)
     print("COLOR MIXING CHAMPIONSHIP".center(50))
     print("=" * 50)
-    print("Two players will compete in two games:")
+    print("Two players will compete in three games:")
     print("  • Game 1: Spectral Light Mixer (2 rounds)")
     print("  • Game 2: Color Scavenger Hunt (5 rounds)")
+    print("  • Game 3: Time Attack Mode (2 minutes)")
     print("\nHighest combined score wins!")
     print("=" * 50)
     sleep_ms(2000)
@@ -25,6 +26,7 @@ while True:
     sleep_ms(1500)
     totals[0] += game1.start_game(player_num=1)
     totals[0] += game2.start_game(player_num=1)
+    totals[0] += game3.start_game(player_num=1)
     print("\n" + "=" * 50)
     print(f"PLAYER 1 FINAL SCORE: {totals[0]} points".center(50))
     print("=" * 50)
@@ -37,6 +39,7 @@ while True:
     sleep_ms(1500)
     totals[1] += game1.start_game(player_num=2)
     totals[1] += game2.start_game(player_num=2)
+    totals[1] += game3.start_game(player_num=2)
     print("\n" + "=" * 50)
     print(f"PLAYER 2 FINAL SCORE: {totals[1]} points".center(50))
     print("=" * 50)
