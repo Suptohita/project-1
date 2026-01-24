@@ -5,13 +5,28 @@ from time import sleep_ms
 restart_btn = button.Button(12, debounce_ms=100)  # LEFT → Restart
 
 while True:
-    # Start Game 1
-    game1.start_game()
+    totals = [0, 0]
 
-    # After Game 1 Continue, move to Game 2
-    game2.start_game()
+    # Player 1
+    totals[0] += game1.start_game(player_num=1)
+    totals[0] += game2.start_game(player_num=1)
+    print(f"\nPlayer 1 total score: {totals[0]}\n")
 
-    # Check global restart
+    # Player 2
+    totals[1] += game1.start_game(player_num=2)
+    totals[1] += game2.start_game(player_num=2)
+    print(f"\nPlayer 2 total score: {totals[1]}\n")
+
+    print(f"Final totals -> Player 1: {totals[0]} | Player 2: {totals[1]}")
+
+    if totals[0] > totals[1]:
+        print("Player 1 wins!")
+    elif totals[1] > totals[0]:
+        print("Player 2 wins!")
+    else:
+        print("It's a tie!")
+
+    print("\nPress LEFT button to restart the full match.")
     while True:
         if restart_btn.was_pressed():
             print("\nRestarting all games...\n")

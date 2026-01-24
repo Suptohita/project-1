@@ -3,7 +3,7 @@ from libs import rgb_led, button, pot_dimmer
 from math import sqrt, floor
 from time import sleep_ms
 
-def start_game():
+def start_game(player_num=1):
     restart_btn = button.Button(12, debounce_ms=100)
     lock_btn    = button.Button(4, debounce_ms=100)
     hint_btn    = button.Button(16, debounce_ms=100)
@@ -21,9 +21,9 @@ def start_game():
     hint_count = 0
     hint_button_prev = 1
     score_history = []
-    player_index = 0
     round_index = 0
-    player_totals = [0, 0]
+    rounds_total = 2
+    total_score = 0
 
     def check_global_restart():
         nonlocal GAME_STATE, score_history
@@ -61,8 +61,8 @@ def start_game():
         print(title.center(50))
         print("=" * 50)
 
-    def print_target_dashboard(rgb_val, player_num, round_num):
-        print_header(f"TARGET COLOR GENERATED (P{player_num} R{round_num})")
+    def print_target_dashboard(rgb_val, player_num, round_num, total_rounds):
+        print_header(f"TARGET COLOR GENERATED (P{player_num} R{round_num}/{total_rounds})")
         print("CHANNEL | CURRENT LEVEL       | VALUE")
         print_separator()
         print(f" R      | {get_bar(rgb_val[0], 20)} | {rgb_val[0]:03}")
@@ -84,10 +84,10 @@ def start_game():
         print(f" B | {get_bar(target[2], 15)} {target[2]:03} | {get_bar(current[2], 15)} {current[2]:03}")
         print_separator()
 
-    def print_result_card(target, current, raw_score, penalty_pct, final_score, hint_count, player_num, round_num):
+    def print_result_card(target, current, raw_score, penalty_pct, final_score, hint_count, player_num, round_num, total_rounds):
         score_history.append({"player": player_num, "round": round_num, "score": final_score, "hints": hint_count})
 
-        print_header(f"FINAL RESULTS (P{player_num} R{round_num})")
+        print_header(f"FINAL RESULTS (P{player_num} R{round_num}/{total_rounds})")
         print("CH | TARGET | YOURS")
         print_separator()
         for ch, t, c in zip(["R", "G", "B"], target, current):
@@ -107,20 +107,12 @@ def start_game():
 
         print("\n[Press RIGHT button to Continue or LEFT button to Restart]")
 
-    def print_match_results():
-        print_header("MATCH RESULTS")
-        print(f"Player 1 total: {player_totals[0]}")
-        print(f"Player 2 total: {player_totals[1]}")
-        if player_totals[0] > player_totals[1]:
-            winner = "Player 1 wins!"
-        elif player_totals[1] > player_totals[0]:
-            winner = "Player 2 wins!"
-        else:
-            winner = "It's a tie!"
-        print_separator()
-        print(winner.center(50))
+    def print_game_total(player_num, total_score, total_rounds):
+        print_header(f"GAME 1 COMPLETE (P{player_num})")
+        print(f"Rounds played: {total_rounds}")
+        print(f"Total score: {total_score}")
         print("=" * 50)
-        print("\n[Press RIGHT button to Reset or LEFT button to Restart]")
+        print("\n[Press RIGHT button to Continue to Game 2 or LEFT button to Restart]")
 
     print("\n\n")
     print("=" * 50)
@@ -137,7 +129,7 @@ def start_game():
             target_rgb = rgb.generate_random_color(True)
             hint_count = 0
             hint_button_prev = 1
-            print_target_dashboard(target_rgb, player_index + 1, round_index + 1)
+            print_target_dashboard(target_rgb, player_num, round_index + 1, rounds_total)
             GAME_STATE = "MIXING"
 
         elif GAME_STATE == "MIXING":
@@ -158,7 +150,7 @@ def start_game():
             penalty_percentage = hint_count * 5
             if penalty_percentage > 100: penalty_percentage = 100
             final_score = int(raw_accuracy * (100 - penalty_percentage) / 100.0)
-            player_totals[player_index] += final_score
+            total_score += final_score
             print_result_card(
                 target_rgb,
                 current_rgb,
@@ -166,37 +158,29 @@ def start_game():
                 penalty_percentage,
                 final_score,
                 hint_count,
-                player_index + 1,
-                round_index + 1
+                player_num,
+                round_index + 1,
+                rounds_total
             )
 
             while True:
                 check_global_restart()
                 if hint_btn.was_pressed():
                     round_index += 1
-                    if round_index >= 2:
-                        round_index = 0
-                        player_index += 1
-                    if player_index >= 2:
-                        GAME_STATE = "MATCH_RESULT"
+                    if round_index >= rounds_total:
+                        GAME_STATE = "GAME_COMPLETE"
                     else:
                         print("\n\nStarting next round...")
                         sleep_ms(500)
                         GAME_STATE = "START"
                     break
                 sleep_ms(50)
-        elif GAME_STATE == "MATCH_RESULT":
-            print_match_results()
+        elif GAME_STATE == "GAME_COMPLETE":
+            print_game_total(player_num, total_score, rounds_total)
             while True:
                 check_global_restart()
                 if hint_btn.was_pressed():
-                    print("\n\nResetting match...")
+                    print("\n\nContinuing to Game 2...")
                     sleep_ms(500)
-                    score_history.clear()
-                    player_totals[0] = 0
-                    player_totals[1] = 0
-                    player_index = 0
-                    round_index = 0
-                    GAME_STATE = "START"
-                    break
+                    return total_score
                 sleep_ms(50)

@@ -4,9 +4,10 @@ from math import sqrt
 from time import sleep_ms
 
 
-def start_game():
+def start_game(player_num=1):
     restart_btn = button.Button(12, debounce_ms=100)  # LEFT → Restart
     lock_btn = button.Button(4, debounce_ms=100)   # MIDDLE → Lock In
+    hint_btn = button.Button(16, debounce_ms=100)  # RIGHT → disabled in Game 2
 
     rgb = rgb_led.RGBLED(15, 2, 17)
     dimmer_map = {
@@ -17,9 +18,7 @@ def start_game():
 
     target_colors = [
         (255, 0, 0), (0, 255, 0), (0, 0, 255),
-        (255, 255, 0), (0, 255, 255), (255, 0, 255),
-        (128, 128, 128), (255, 128, 0), (128, 0, 255),
-        (0, 128, 255)
+        (255, 255, 0), (0, 255, 255)
     ]
 
     current_round = 0
@@ -51,7 +50,7 @@ def start_game():
 
     def print_target_info(round_num, total):
         print("\n" + "=" * 50)
-        print(f"COLOR SCAVENGER HUNT - ROUND {round_num}/{total}".center(50))
+        print(f"COLOR SCAVENGER HUNT - P{player_num} ROUND {round_num}/{total}".center(50))
         print("=" * 50)
         print("Memorize the color shown on the LED")
         print("Adjust knobs to match, then press MIDDLE button to Lock In")
@@ -60,8 +59,12 @@ def start_game():
 
     def show_target_color(target, duration_ms=5000):
         rgb.set_color(*target)
-        sleep_ms(duration_ms)
+        seconds = max(1, int(duration_ms / 1000))
+        for remaining in range(seconds, 0, -1):
+            print(f"Check the LED, turning off color in {remaining}")
+            sleep_ms(1000)
         rgb.set_color(0, 0, 0)
+        print("Time's up! Now guess the color.")
 
     def print_round_result(current_score):
         print(f"\nRound result: {current_score} points")
@@ -70,12 +73,12 @@ def start_game():
 
     def print_final_result():
         print("\n" + "=" * 50)
-        print("GAME COMPLETE!".center(50))
+        print(f"GAME COMPLETE - P{player_num}".center(50))
         print(f"Your final score: {score}/{len(target_colors)}".center(50))
         print("=" * 50)
-        print("\nPress LEFT button to Restart")
+        print("\nPress RIGHT button to Continue or LEFT button to Restart")
 
-    print("\nStarting Color Scavenger Hunt...")
+    print(f"\nStarting Color Scavenger Hunt for Player {player_num}...")
 
     GAME_STATE = "START"
 
@@ -101,6 +104,8 @@ def start_game():
             round_done = False
             while not round_done:
                 check_global_restart()
+                if hint_btn.was_pressed():
+                    print("\nHints are disabled in Game 2.")
                 r = normalize_pot_value(dimmer_map["R"].update())
                 g = normalize_pot_value(dimmer_map["G"].update())
                 b = normalize_pot_value(dimmer_map["B"].update())
@@ -122,4 +127,8 @@ def start_game():
             print_final_result()
             while True:
                 check_global_restart()
+                if hint_btn.was_pressed():
+                    print("\nContinuing...")
+                    sleep_ms(500)
+                    return score
                 sleep_ms(50)
