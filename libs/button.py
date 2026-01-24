@@ -1,12 +1,13 @@
 from machine import Pin
 import time
 
+
 class Button:
     def __init__(self, pin_number, debounce_ms=200):
         self.pin = Pin(pin_number, Pin.IN, Pin.PULL_UP)
         self.debounce_ms = debounce_ms
         self.last_press_time = 0
-        self.last_state = 1 
+        self.last_state = 1
 
     def was_pressed(self):
         """
@@ -15,14 +16,14 @@ class Button:
         """
         current_state = self.pin.value()
         is_pressed_now = False
-        
+
         if current_state == 0 and self.last_state == 1:
-            
+
             current_time = time.ticks_ms()
             if time.ticks_diff(current_time, self.last_press_time) > self.debounce_ms:
                 self.last_press_time = current_time
                 is_pressed_now = True
-        
+
         self.last_state = current_state
         return is_pressed_now
 
